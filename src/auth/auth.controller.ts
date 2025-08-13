@@ -17,18 +17,15 @@ import { validationResult } from "express-validator";
  *       required: true
  *       content:
  *         application/json:
-*           schema:
-*             $ref: '#/components/schemas/UpdateUserDto'
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserDto'
  *     responses:
  *       200:
  *         description: Güncellenen kullanıcı
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/User'
  */
 /**
  * @openapi
@@ -83,7 +80,6 @@ import { validationResult } from "express-validator";
  */
 
 export class AuthController {
-
   /**
    * @openapi
    * /auth/register:
@@ -96,19 +92,18 @@ export class AuthController {
    *       content:
    *         application/json:
    *           schema:
-*             $ref: '#/components/schemas/CreateUserDto'
-   *               password:
-   *                 type: string
+   *             $ref: '#/components/schemas/CreateUserDto'
    *     responses:
    *       201:
    *         description: Başarılı kayıt
    *         content:
-*               type: object
-*               properties:
-*                 message:
-*                   type: string
-*                   example: Profile updated successfully
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
    *                   type: string
+   *                   example: User registered
    *                 userId:
    *                   type: string
    */
@@ -204,7 +199,7 @@ export class AuthController {
    *               type: object
    *               properties:
    *                 user:
-   *                   type: object
+   *                   $ref: '#/components/schemas/User'
    */
   static async profile(req: Request, res: Response, next: NextFunction) {
     try {
@@ -218,7 +213,7 @@ export class AuthController {
     }
   }
 
-    /**
+  /**
    * @openapi
    * /auth/profile:
    *   put:
@@ -232,30 +227,19 @@ export class AuthController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               name:
-   *                 type: string
-   *               email:
-   *                 type: string
-   *                 format: email
-   *               password:
-   *                 type: string
+   *             $ref: '#/components/schemas/UpdateUserDto'
    *     responses:
    *       200:
    *         description: Güncellenen kullanıcı
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 user:
-   *                   $ref: '#/components/schemas/User'
+   *               $ref: '#/components/schemas/User'
    */
   static async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).userId;
-  const updateData: UpdateUserDto = req.body;
+      const updateData: UpdateUserDto = req.body;
       const updatedUser = await AuthService.updateUserProfile(
         userId,
         updateData

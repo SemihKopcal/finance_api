@@ -16,12 +16,16 @@ export class CategoryService {
         return Category.findById(categoryId).populate('userId', 'name email');
     }
 
+    static async getCategoryByIdAndUserId(categoryId: string, userId: string): Promise<ICategory | null> {
+        return Category.findOne({ _id: categoryId, userId }).populate('userId', 'name email');
+    }
+
     static async updateCategory(categoryId: string, updateData: Partial<ICategory>): Promise<ICategory | null> {
         return Category.findByIdAndUpdate(categoryId, updateData, { new: true }).populate('userId', 'name email');
     }
 
-    static async deleteCategory(categoryId: string): Promise<ICategory | null> {
-        return Category.findByIdAndDelete(categoryId).populate('userId', 'name email');
+    static async deleteCategory(categoryId: string): Promise<boolean> {
+        const result = await Category.findByIdAndDelete(categoryId);
+        return result !== null;
     }
-
 }

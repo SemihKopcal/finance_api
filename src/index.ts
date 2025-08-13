@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 // Routes 
 import authRoute from "./auth/auth.route" 
 import categoryRoute from "./categories/categories.route"
+import transactionsRoute from "./transactions/transactions.route";
+
 import { setupSwagger } from "./swagger";
 
 
@@ -23,6 +25,7 @@ app.use(express.json());
 
 app.use("/auth", authRoute);
 app.use("/categories", categoryRoute);
+app.use("/transactions", transactionsRoute);
 
 // Swagger dokümantasyonu
 setupSwagger(app);

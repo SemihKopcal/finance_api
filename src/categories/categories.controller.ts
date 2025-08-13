@@ -33,7 +33,7 @@ import { Request, Response, NextFunction } from "express";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
 import { CategoryService } from "./categories.service";
-import { AuthRequest } from "../auth/auth.middleware"; // veya tanımladığın yere göre
+import { AuthRequest } from "../auth/auth.middleware";
 
 export class CategoryController {
   /**
@@ -49,8 +49,8 @@ export class CategoryController {
    *       required: true
    *       content:
    *         application/json:
-*           schema:
-*             $ref: '#/components/schemas/CreateCategoryDto'
+   *           schema:
+   *             $ref: '#/components/schemas/CreateCategoryDto'
    *     responses:
    *       201:
    *         description: Başarılı
@@ -65,8 +65,12 @@ export class CategoryController {
     next: NextFunction
   ) {
     try {
-      const { name, type, color } = req.body;
+      const { name, type, color } = req.body as CreateCategoryDto;
       const userId = req.userId as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const category = await CategoryService.createCategory(
         name,
         type,
@@ -118,6 +122,10 @@ export class CategoryController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = 10;
       const userId = req.userId as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const categories = await CategoryService.getAllCategory(
         userId,
         page,
@@ -161,22 +169,19 @@ export class CategoryController {
     try {
       const { id } = req.params;
       const userId = req.userId as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       if (!id) {
         return res.status(400).json({ message: "Category id is required" });
       }
-      const category = await CategoryService.getCategoryById(id);
+      
+      const category = await CategoryService.getCategoryByIdAndUserId(id, userId);
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
       }
-      let categoryUserId: string;
-      if (category.userId && typeof category.userId === "object" && "_id" in category.userId) {
-        categoryUserId = (category.userId as any)._id.toString();
-      } else {
-        categoryUserId = category.userId.toString();
-      }
-      if (categoryUserId !== userId) {
-        return res.status(404).json({ message: "Category not found" });
-      }
+      
       res.json(category);
     } catch (error) {
       next(error);
@@ -203,8 +208,8 @@ export class CategoryController {
    *       required: true
    *       content:
    *         application/json:
-*           schema:
-*             $ref: '#/components/schemas/UpdateCategoryDto'
+   *           schema:
+   *             $ref: '#/components/schemas/UpdateCategoryDto'
    *     responses:
    *       200:
    *         description: Güncellenen kategori
@@ -221,24 +226,22 @@ export class CategoryController {
     try {
       const { id } = req.params;
       const userId = req.userId as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       if (!id) {
         return res.status(400).json({ message: "Category id is required" });
       }
-  const updateData: UpdateCategoryDto = req.body;
-      const category = await CategoryService.getCategoryById(id);
-      // Sadece kendi kategorisi ise güncelle
-      if (!category) {
+      
+      const updateData: UpdateCategoryDto = req.body;
+      
+      // Önce kategorinin kullanıcıya ait olup olmadığını kontrol et
+      const existingCategory = await CategoryService.getCategoryByIdAndUserId(id, userId);
+      if (!existingCategory) {
         return res.status(404).json({ message: "Category not found" });
       }
-      let categoryUserId: string;
-      if (category.userId && typeof category.userId === "object" && "_id" in category.userId) {
-        categoryUserId = (category.userId as any)._id.toString();
-      } else {
-        categoryUserId = category.userId.toString();
-      }
-      if (categoryUserId !== userId) {
-        return res.status(404).json({ message: "Category not found" });
-      }
+      
       const updated = await CategoryService.updateCategory(id, updateData);
       res.json(updated);
     } catch (error) {
@@ -274,23 +277,20 @@ export class CategoryController {
     try {
       const { id } = req.params;
       const userId = req.userId as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       if (!id) {
         return res.status(400).json({ message: "Category id is required" });
       }
-      const category = await CategoryService.getCategoryById(id);
-      // Sadece kendi kategorisi ise sil
-      if (!category) {
+      
+      // Önce kategorinin kullanıcıya ait olup olmadığını kontrol et
+      const existingCategory = await CategoryService.getCategoryByIdAndUserId(id, userId);
+      if (!existingCategory) {
         return res.status(404).json({ message: "Category not found" });
       }
-      let categoryUserId: string;
-      if (category.userId && typeof category.userId === "object" && "_id" in category.userId) {
-        categoryUserId = (category.userId as any)._id.toString();
-      } else {
-        categoryUserId = category.userId.toString();
-      }
-      if (categoryUserId !== userId) {
-        return res.status(404).json({ message: "Category not found" });
-      }
+      
       await CategoryService.deleteCategory(id);
       res.status(204).send();
     } catch (error) {

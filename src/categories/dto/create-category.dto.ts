@@ -22,9 +22,6 @@
  *         color:
  *           type: string
  *           example: "#FF5733"
- *         userId:
- *           type: string
- *           example: "64e5b2f2c2a4f2a1b8e5b2f2"
  *         isDefault:
  *           type: boolean
  *           example: false
@@ -36,7 +33,6 @@ export interface CreateCategoryDto {
   name: string;
   type: "income" | "expense";
   color: string;
-  userId: string;
   isDefault?: boolean;
   description?: string;
 }
