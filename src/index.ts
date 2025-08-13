@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 
 // Routes 
 import authRoute from "./auth/auth.route" 
+import categoryRoute from "./categories/categories.route"
+import { setupSwagger } from "./swagger";
 
 
 import connectDB from "./db";
@@ -17,7 +19,13 @@ connectDB();
 const app = express();
 app.use(express.json());
 
+
+
 app.use("/auth", authRoute);
+app.use("/categories", categoryRoute);
+
+// Swagger dokümantasyonu
+setupSwagger(app);
 
 const PORT = process.env.PORT || 3001;
 
