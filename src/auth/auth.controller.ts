@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { AuthService } from "./auth.service";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
+import { Request, Response, NextFunction } from 'express';
+import { AuthService } from './auth.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import jwt from 'jsonwebtoken';
+import { validationResult } from 'express-validator';
 
 /**
  * @openapi
@@ -111,11 +111,11 @@ export class AuthController {
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
-
+    
     try {
       const { name, email, password } = req.body;
       const user = await AuthService.register(name, email, password);
-      res.status(201).json({ message: "User registered", userId: user._id });
+      res.status(201).json({ message: 'User registered', userId: user._id });
     } catch (error: any) {
       // Email already exists hatası için özel handling
       if (error.code === 'EMAIL_ALREADY_EXISTS') {
@@ -124,11 +124,12 @@ export class AuthController {
           error: {
             code: 'EMAIL_ALREADY_EXISTS',
             message: error.message,
-            details: 'Bu email adresi ile daha önce kayıt yapılmış. Lütfen farklı bir email adresi kullanın veya giriş yapın.'
-          }
+            details:
+              'Bu email adresi ile daha önce kayıt yapılmış. Lütfen farklı bir email adresi kullanın veya giriş yapın.',
+          },
         });
       }
-      
+
       // Diğer hatalar için next() ile error middleware'e gönder
       next(error);
     }
@@ -183,22 +184,22 @@ export class AuthController {
           error: {
             code: 'INVALID_CREDENTIALS',
             message: 'Geçersiz email veya şifre',
-            details: 'Lütfen email adresinizi ve şifrenizi kontrol edin.'
-          }
+            details: 'Lütfen email adresinizi ve şifrenizi kontrol edin.',
+          },
         });
 
       const token = jwt.sign(
         { userId: user._id },
-        process.env.JWT_SECRET || "secretkey",
+        process.env.JWT_SECRET || 'secretkey',
         {
-          expiresIn: "1d",
+          expiresIn: '1d',
         }
       );
 
-      res.json({ 
+      res.json({
         success: true,
         message: 'Giriş başarılı',
-        token 
+        token,
       });
     } catch (error) {
       next(error);
@@ -229,7 +230,7 @@ export class AuthController {
     try {
       const userId = (req as any).userId;
       const user = await AuthService.getUserProfile(userId);
-      if (!user) return res.status(404).json({ message: "User not found" });
+      if (!user) return res.status(404).json({ message: 'User not found' });
 
       res.json({ user });
     } catch (error) {
@@ -269,7 +270,7 @@ export class AuthController {
         updateData
       );
       if (!updatedUser)
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: 'User not found' });
       res.json({ user: updatedUser });
     } catch (error) {
       next(error);
