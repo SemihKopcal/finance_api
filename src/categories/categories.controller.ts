@@ -204,7 +204,6 @@ export class CategoryController {
         return res.status(400).json({ message: 'Category id is required' });
       }
 
-      // Opsiyonel auth
       let userId: string | undefined;
       const authHeader = req.headers['authorization'] as string | undefined;
       const token = authHeader && authHeader.split(' ')[1];
@@ -216,24 +215,21 @@ export class CategoryController {
           );
           userId = decoded.userId as string | undefined;
         } catch {
-          // geçersiz token varsa anonım devam et
         }
       }
 
-      // Kategoriyi bul
+      // find the category
       const category = await CategoryService.getCategoryById(id);
       if (!category) {
         return res.status(404).json({ message: 'Category not found' });
       }
 
-      // Default kategoriler herkese görünür
       if (category.isDefault) {
         return res.json(category);
       }
 
-      // Kullanıcı kategorileri sadece sahibi görebilir
       if (userId && category.userId) {
-        // category.userId populated user objesi olabilir, _id'yi al
+       
         const categoryUserId =
           typeof category.userId === 'object' && (category.userId as any)._id
             ? (category.userId as any)._id
@@ -301,12 +297,12 @@ export class CategoryController {
 
       const updateData: UpdateCategoryDto = req.body;
 
-      // Kategori var mı?
+      // is category exist ?
       const existingAny = await CategoryService.getCategoryById(id);
       if (!existingAny) {
         return res.status(404).json({ message: 'Category not found' });
       }
-      // Default kategoriler güncellenemez
+      
       if (existingAny.isDefault) {
         return res.status(400).json({
           message: 'Default kategoriler güncellenemez',
@@ -315,7 +311,6 @@ export class CategoryController {
         });
       }
 
-      // Kullanıcının kendi kategorisi olmak zorunda
       const existingCategory = await CategoryService.getCategoryByIdAndUserId(
         id,
         userId
@@ -324,7 +319,6 @@ export class CategoryController {
         return res.status(403).json({ message: 'Forbidden' });
       }
 
-      // Hassas alanları istemcinin değiştirmesini engelle (isDefault, userId)
       const sanitizedUpdateData: UpdateCategoryDto = { ...updateData };
       if ((sanitizedUpdateData as any).isDefault !== undefined)
         delete (sanitizedUpdateData as any).isDefault;
@@ -434,7 +428,6 @@ export class CategoryController {
         return res.status(400).json({ message: 'Category id is required' });
       }
 
-      // Kategori var mı ve default mu?
       const existingAny = await CategoryService.getCategoryById(id);
       if (!existingAny) {
         return res.status(404).json({ message: 'Category not found' });
@@ -444,7 +437,6 @@ export class CategoryController {
           .status(400)
           .json({ message: 'Default kategoriler silinemez' });
       }
-      // Kullanıcıya ait olmalı
       const existingCategory = await CategoryService.getCategoryByIdAndUserId(
         id,
         userId

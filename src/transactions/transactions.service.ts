@@ -6,13 +6,11 @@ import mongoose from 'mongoose';
 
 export class TransactionService {
   static async createTransaction(data: CreateTransactionDto, userId: string): Promise<ITransaction> {
-    // Kategori tipini kontrol et
     const category = await Category.findById(data.categoryId);
     if (!category) {
       throw new Error('Kategori bulunamadı');
     }
 
-    // Transaction tipi ile kategori tipi uyumlu mu kontrol et
     if (data.type !== category.type) {
       throw new Error(`Bu kategori sadece ${category.type === 'income' ? 'gelir' : 'gider'} işlemleri için kullanılabilir. Seçilen kategori: ${category.name} (${category.type === 'income' ? 'Gelir' : 'Gider'})`);
     }
@@ -163,7 +161,6 @@ export class TransactionService {
     const transaction = await Transaction.findOne({ _id: id, userId });
     if (!transaction) return null;
 
-    // Eğer type veya categoryId değişiyorsa, uyumluluğu kontrol et
     if (updateData.type !== undefined || updateData.categoryId !== undefined) {
       const newType = updateData.type || transaction.type;
       const newCategoryId = updateData.categoryId || transaction.categoryId;

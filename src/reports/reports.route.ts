@@ -6,7 +6,7 @@ import {
   validateMonthQuery
 } from '../middleware/validation.middleware';
 
-const router = Router();
+const router: Router = Router();
 
 // Tüm reports endpoint'leri için authentication gerekli
 router.use(authMiddleware);

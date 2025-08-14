@@ -1,20 +1,17 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { Category } from './categories/entities/categories.model';
-import { Transaction } from './transactions/entities/transaction.model';
-import { User } from './auth/entities/user.model';
+import { Category } from '../categories/entities/categories.model';
+import { Transaction } from '../transactions/entities/transaction.model';
+import { User } from '../user/entities/user.model';
 
 dotenv.config();
 
-// Demo kullanıcı ID'si - gerçek kullanıcıdan alınacak
 let DEMO_USER_ID: string = '';
 
-// Rastgele tutar üretme fonksiyonu
 const getRandomAmount = (min: number, max: number): number => {
   return Math.round((Math.random() * (max - min) + min) * 100) / 100;
 };
 
-// Rastgele tarih üretme fonksiyonu (son 6 ay içinde)
 const getRandomDate = (): Date => {
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
@@ -24,7 +21,6 @@ const getRandomDate = (): Date => {
   return new Date(randomTime);
 };
 
-// Rastgele açıklama üretme fonksiyonu
 const getRandomDescription = (categoryName: string, type: string): string => {
   const incomeDescriptions: Record<string, string[]> = {
     Maaş: ['Aylık maaş ödemesi', 'Maaş transferi', 'İş maaşı'],
@@ -71,7 +67,6 @@ const getRandomDescription = (categoryName: string, type: string): string => {
 
 const seedTransactions = async () => {
   try {
-    // İlk kullanıcıyı bul
     let user = await User.findOne();
     if (!user) {
       console.log('Kullanıcı bulunamadı. Önce bir kullanıcı oluşturun!');
@@ -81,7 +76,6 @@ const seedTransactions = async () => {
     DEMO_USER_ID = (user._id as any).toString();
     console.log(`Kullanıcı bulundu: ${user.email} (ID: ${DEMO_USER_ID})`);
 
-    // Eğer zaten transaction varsa ekleme yapma
     const existingTransactions = await Transaction.find({ userId: DEMO_USER_ID });
     if (existingTransactions.length > 0) {
       console.log(`🚫 ${existingTransactions.length} transaction zaten mevcut. Seed işlemi atlandı.`);
@@ -101,16 +95,14 @@ const seedTransactions = async () => {
 
     const createdTransactions = [];
 
-    // Her kategori için 2-3 transaction oluşturur
     for (const category of defaultCategories) {
-      const transactionCount = Math.floor(Math.random() * 2) + 2; // 2-3 arası
+      const transactionCount = Math.floor(Math.random() * 2) + 2; // 2-3 
 
       console.log(
         `${category.name} kategorisi için ${transactionCount} transaction oluşturuluyor...`
       );
 
       for (let i = 0; i < transactionCount; i++) {
-        // Kategori tipine göre tutar aralığı belirlenir
         let minAmount, maxAmount;
         if (category.type === 'income') {
           minAmount = 1000;
@@ -145,7 +137,7 @@ const seedTransactions = async () => {
       `\n✅ Toplam ${createdTransactions.length} transaction başarıyla oluşturuldu!`
     );
 
-    // Özet bilgiler
+    // summary infos
     const incomeTransactions = createdTransactions.filter(
       (t) => t.type === 'income'
     );

@@ -7,7 +7,8 @@
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.ts",
-    "seed:transactions": "ts-node src/seed-transactions.ts",
+    "seed:transactions": "ts-node src/seed/seed-transactions.ts",
+    "seed:categories": "ts-node src/seed/seed-categories.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -25,10 +26,7 @@
     "express-rate-limit": "^8.0.1",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.17.1",
-    "node-mocks-http": "^1.17.2",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "mongoose": "^8.17.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -47,6 +45,9 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "node-mocks-http": "^1.17.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }

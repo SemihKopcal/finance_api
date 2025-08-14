@@ -4,7 +4,7 @@ export interface ICategory extends Document {
     name: string;
     type: "income" | "expense";
     color: string; // it will be hex color
-    userId?: object; // Opsiyonel - default kategoriler için null olabilir
+    userId?: object;
     isDefault: boolean;
     createdAt: Date;
 }
@@ -13,7 +13,7 @@ const categorySchema = new Schema<ICategory>({
     name: { type: String, required: true },
     type: { type: String, enum: ["income", "expense"], required: true },
     color: { type: String },
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: false }, // Opsiyonel
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: false },
     isDefault: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
 });

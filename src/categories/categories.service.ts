@@ -18,7 +18,6 @@ export class CategoryService {
     { name: 'Fatura', type: 'expense', color: '#FF9800', isDefault: true },
   ];
 
-  // Kullanıcıya özel default kategorileri oluştur
   static async createDefaultCategoriesForUser(userId: string): Promise<void> {
     for (const defaultCategory of this.DEFAULT_CATEGORIES) {
       const existingCategory = await Category.findOne({
@@ -40,12 +39,10 @@ export class CategoryService {
     }
   }
 
-  // Sadece default kategorileri döndür
   static getDefaultCategories(): IDefaultCategory[] {
     return this.DEFAULT_CATEGORIES;
   }
 
-  // Kullanıcıya özel kategori oluştur
   static async createCategory(
     name: string,
     type: 'income' | 'expense',
@@ -63,7 +60,6 @@ export class CategoryService {
     return category;
   }
 
-  // Kullanıcının kendi kategorilerini ve default kategorileri getir
   static async getAllCategory(
     userId: string,
     page: number = 1,
@@ -71,22 +67,18 @@ export class CategoryService {
   ): Promise<ICategory[]> {
     const skip = (page - 1) * limit;
 
-    // Kullanıcının kendi kategorileri
     const userCategories = await Category.find({ userId, isDefault: false })
       .skip(skip)
       .limit(limit)
       .populate('userId', 'name email');
 
-    // Default kategoriler (sayfalama olmadan)
     const defaultCategories = await Category.find({
       isDefault: true,
       userId,
     });
 
-    // kullanıcının tum kategorileri
     const allCategories = [...userCategories, ...defaultCategories];
 
-    // Sayfalama uygula
     return allCategories.slice(skip, skip + limit);
   }
 
@@ -114,24 +106,20 @@ export class CategoryService {
   }
 
   static async deleteCategory(categoryId: string): Promise<boolean> {
-    // Önce kategoriyi bul
     const category = await Category.findById(categoryId);
     if (!category) {
       return false;
     }
 
-    // Default kategoriler silinemez
     if (category.isDefault) {
       throw new Error('Default kategoriler silinemez');
     }
 
-    // Kategoriye ait tüm işlemleri sil
     const deleteTransactionsResult = await Transaction.deleteMany({
       categoryId,
     });
     console.log(`${deleteTransactionsResult.deletedCount} adet işlem silindi`);
 
-    // Kategoriyi sil
     const result = await Category.findByIdAndDelete(categoryId);
     return result !== null;
   }

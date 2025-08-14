@@ -146,7 +146,6 @@ export class ReportsService {
       periodInfo = { month };
     }
 
-    // Gelir kategorileri
     const incomeCategories = await Transaction.aggregate([
       {
         $match: {
@@ -190,7 +189,6 @@ export class ReportsService {
       },
     ]);
 
-    // Gider kategorileri
     const expenseCategories = await Transaction.aggregate([
       {
         $match: {
@@ -234,7 +232,6 @@ export class ReportsService {
       },
     ]);
 
-    // Toplam değerleri hesapla
     const totalIncome = incomeCategories.reduce(
       (sum, cat) => sum + cat.totalAmount,
       0
@@ -252,7 +249,6 @@ export class ReportsService {
       0
     );
 
-    // Yüzde hesaplamaları
     const incomeWithPercentage = incomeCategories.map((cat) => ({
       ...cat,
       percentage:
@@ -294,7 +290,6 @@ export class ReportsService {
       now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
     const currentYear = now.getFullYear();
 
-    // Mevcut ay başlangıcı ve bitişi
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(
       now.getFullYear(),
@@ -306,7 +301,6 @@ export class ReportsService {
       999
     );
 
-    // Yıl başlangıcı ve bitişi
     const yearStart = new Date(currentYear, 0, 1);
     const yearEnd = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
@@ -318,7 +312,6 @@ export class ReportsService {
       allTimeIncome,
       allTimeExpense,
     ] = await Promise.all([
-      // Aylık gelir
       Transaction.aggregate([
         {
           $match: {
@@ -334,7 +327,6 @@ export class ReportsService {
           },
         },
       ]),
-      // Aylık gider
       Transaction.aggregate([
         {
           $match: {
@@ -350,7 +342,6 @@ export class ReportsService {
           },
         },
       ]),
-      // Yıllık gelir
       Transaction.aggregate([
         {
           $match: {
@@ -366,7 +357,6 @@ export class ReportsService {
           },
         },
       ]),
-      // Yıllık gider
       Transaction.aggregate([
         {
           $match: {
@@ -382,7 +372,6 @@ export class ReportsService {
           },
         },
       ]),
-      // Tüm zamanlar gelir
       Transaction.aggregate([
         {
           $match: {
@@ -397,7 +386,6 @@ export class ReportsService {
           },
         },
       ]),
-      // Tüm zamanlar gider
       Transaction.aggregate([
         {
           $match: {
@@ -414,7 +402,6 @@ export class ReportsService {
       ]),
     ]);
 
-    // Değerleri al
     const monthlyIncomeAmount = monthlyIncome[0]?.total || 0;
     const monthlyExpenseAmount = monthlyExpense[0]?.total || 0;
     const yearlyIncomeAmount = yearlyIncome[0]?.total || 0;
@@ -422,7 +409,6 @@ export class ReportsService {
     const allTimeIncomeAmount = allTimeIncome[0]?.total || 0;
     const allTimeExpenseAmount = allTimeExpense[0]?.total || 0;
 
-    // Net değerleri hesapla
     const monthlyNet = monthlyIncomeAmount - monthlyExpenseAmount;
     const yearlyNet = yearlyIncomeAmount - yearlyExpenseAmount;
     const allTimeNet = allTimeIncomeAmount - allTimeExpenseAmount;

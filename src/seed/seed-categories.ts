@@ -1,5 +1,5 @@
-import { User } from './auth/entities/user.model';
-import { CategoryService } from './categories/categories.service';
+import { User } from '../user/entities/user.model';
+import { CategoryService } from '../categories/categories.service';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
@@ -7,7 +7,7 @@ dotenv.config();
 
 const seedCategories = async () => {
   try {
-    // İlk kullanıcıyı bul
+    // find the first user
     const user = await User.findOne();
     if (!user) {
       console.log('Kullanıcı bulunamadı. Önce bir kullanıcı oluşturun!');
@@ -17,7 +17,6 @@ const seedCategories = async () => {
     const userId: string = String(user._id);
     console.log(`Kullanıcı bulundu: ${user.email} (ID: ${userId})`);
 
-    // Default kategorileri kullanıcı için oluştur
     await CategoryService.createDefaultCategoriesForUser(userId);
 
     console.log('✅ Default kategoriler başarıyla oluşturuldu!');

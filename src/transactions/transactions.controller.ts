@@ -448,7 +448,6 @@ export class TransactionsController {
         page: Number(page),
       };
 
-      // Sadece tanımlı değerleri ekle
       if (type) filters.type = type as string;
       if (category) filters.category = category as string;
       if (startDate) filters.startDate = startDate as string;

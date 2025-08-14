@@ -1,4 +1,4 @@
-// category.service.spec.ts
+// category.service.test.ts
 import { CategoryService } from '../categories.service';
 import { Category } from '../entities/categories.model';
 import { Transaction } from '../../transactions/entities/transaction.model';
@@ -70,7 +70,7 @@ describe('CategoryService', () => {
   describe('getAllCategory', () => {
     it('should return combined user and default categories with pagination', async () => {
       (Category.find as jest.Mock)
-        // 1. çağrı → userCategories
+      
         .mockReturnValueOnce({
           skip: () => ({
             limit: () => ({
@@ -78,7 +78,7 @@ describe('CategoryService', () => {
             }),
           }),
         })
-        // 2. çağrı → defaultCategories
+        
         .mockResolvedValueOnce(['defaultCat']);
 
       const result = await CategoryService.getAllCategory('user1', 1, 10);

@@ -10,10 +10,8 @@ import {
 
 const router: Router = Router();
 
-// Default kategorileri getirir (authentication gerekmez)
 router.get("/defaults", CategoryController.getDefaultCategories);
 
-// Kullanıcının kendi kategorileri
 router.get("/", 
   authenticateToken, 
   validateGetCategories, 

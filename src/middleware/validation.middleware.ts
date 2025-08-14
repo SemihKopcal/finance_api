@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 
-// Validation sonuçlarını kontrol eden helper
 const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -23,7 +22,6 @@ const handleValidationErrors = (req: Request, res: Response, next: NextFunction)
 
 // ===== CATEGORY VALIDATION =====
 
-// Category oluşturma validation
 export const validateCreateCategory = [
   body('name')
     .trim()
@@ -43,7 +41,6 @@ export const validateCreateCategory = [
   handleValidationErrors
 ];
 
-// Category güncelleme validation
 export const validateUpdateCategory = [
   param('id')
     .isMongoId()
@@ -70,7 +67,6 @@ export const validateUpdateCategory = [
   handleValidationErrors
 ];
 
-// Category listeleme validation
 export const validateGetCategories = [
   query('page')
     .optional()
@@ -85,7 +81,6 @@ export const validateGetCategories = [
   handleValidationErrors
 ];
 
-// Category ID validation
 export const validateCategoryId = [
   param('id')
     .isMongoId()
@@ -96,7 +91,6 @@ export const validateCategoryId = [
 
 // ===== AUTH VALIDATION =====
 
-// User kayıt validation
 export const validateUserRegistration = [
   body('name')
     .trim()
@@ -119,7 +113,6 @@ export const validateUserRegistration = [
   handleValidationErrors
 ];
 
-// User giriş validation
 export const validateUserLogin = [
   body('email')
     .isEmail()
@@ -133,7 +126,6 @@ export const validateUserLogin = [
   handleValidationErrors
 ];
 
-// User güncelleme validation
 export const validateUserUpdate = [
   body('name')
     .optional()
@@ -159,7 +151,6 @@ export const validateUserUpdate = [
   handleValidationErrors
 ];
 
-// User ID validation
 export const validateUserId = [
   param('id')
     .isMongoId()
@@ -170,7 +161,6 @@ export const validateUserId = [
 
 // ===== TRANSACTION VALIDATION =====
 
-// Transaction oluşturma validation
 export const validateCreateTransaction = [
   body('amount')
     .isFloat({ min: 0.01 })
@@ -198,7 +188,6 @@ export const validateCreateTransaction = [
   handleValidationErrors
 ];
 
-// Transaction güncelleme validation
 export const validateUpdateTransaction = [
   param('id')
     .isMongoId()
@@ -233,7 +222,6 @@ export const validateUpdateTransaction = [
   handleValidationErrors
 ];
 
-// Transaction listeleme validation
 export const validateGetTransactions = [
   query('page')
     .optional()
@@ -278,7 +266,6 @@ export const validateGetTransactions = [
   handleValidationErrors
 ];
 
-// Transaction ID validation
 export const validateTransactionId = [
   param('id')
     .isMongoId()
@@ -289,7 +276,6 @@ export const validateTransactionId = [
 
 // ===== REPORTS VALIDATION =====
 
-// Rapor oluşturma validation
 export const validateCreateReport = [
   body('type')
     .isIn(['income', 'expense', 'summary', 'category', 'trend'])
@@ -316,7 +302,6 @@ export const validateCreateReport = [
   handleValidationErrors
 ];
 
-// Rapor listeleme validation
 export const validateGetReports = [
   query('page')
     .optional()
@@ -346,7 +331,6 @@ export const validateGetReports = [
   handleValidationErrors
 ];
 
-// Rapor ID validation
 export const validateReportId = [
   param('id')
     .isMongoId()
@@ -355,7 +339,6 @@ export const validateReportId = [
   handleValidationErrors
 ];
 
-// Tarih aralığı validation (genel kullanım için)
 export const validateDateRange = [
   query('startDate')
     .isISO8601()
@@ -372,15 +355,15 @@ export const validateMonthQuery = [
   query('month')
     .optional()
     .custom((value) => {
-      if (!value) return true; // month parametresi opsiyonel
+      if (!value) return true; 
       
-      // YYYY-MM, YYYY/MM, YYYY.MM formatlarını kabul et
+      // YYYY-MM, YYYY/MM, YYYY.MM 
       const monthPattern = /^\d{4}[-/.]\d{1,2}$/;
       if (!monthPattern.test(value)) {
         throw new Error('Ay parametresi YYYY-MM, YYYY/MM veya YYYY.MM formatında olmalı');
       }
       
-      // Ay değerinin 1-12 arasında olduğunu kontrol et
+      // Checked whether the month is between 1-12
       const parts = value.split(/[-/.]/);
       const month = parseInt(parts[1]);
       if (month < 1 || month > 12) {

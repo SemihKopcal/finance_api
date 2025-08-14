@@ -1,38 +1,38 @@
 # 💰 Financial Management API
 
-Modern finansal yönetim uygulaması için RESTful API. Gelir-gider takibi, kategori yönetimi, detaylı raporlama ve kullanıcı kimlik doğrulama özellikleri içerir.
+A modern RESTful API for financial management applications. Includes income-expense tracking, category management, detailed reporting, and user authentication features.
 
-## 🚀 Özellikler
+## 🚀 Features
 
-- **🔐 Kullanıcı Yönetimi**: JWT tabanlı kimlik doğrulama
-- **💰 İşlem Takibi**: Gelir ve gider kayıtları
-- **📊 Kategori Yönetimi**: Özelleştirilebilir kategoriler
-- **📈 Raporlama**: Detaylı finansal analizler
-- **✅ Validation**: Kapsamlı veri doğrulama
-- **📚 Swagger**: Otomatik API dokümantasyonu
-- **🗄️ MongoDB**: NoSQL veritabanı desteği
-- **🔒 Güvenlik**: CORS, rate limiting, input sanitization
+- **🔐 User Management**: JWT-based authentication
+- **💰 Transaction Tracking**: Income and expense records
+- **📊 Category Management**: Customizable categories
+- **📈 Reporting**: Detailed financial analytics
+- **✅ Validation**: Comprehensive data validation
+- **📚 Swagger**: Automatic API documentation
+- **🗄️ MongoDB**: NoSQL database support
+- **🔒 Security**: CORS, rate limiting, input sanitization
 
-## 🛠️ Teknolojiler
+## 🛠️ Technologies
 
 - **Backend**: Node.js + Express.js
-- **Dil**: TypeScript
-- **Veritabanı**: MongoDB + Mongoose
-- **Kimlik Doğrulama**: JWT + bcrypt
+- **Language**: TypeScript
+- **Database**: MongoDB + Mongoose
+- **Authentication**: JWT + bcrypt
 - **Validation**: express-validator
-- **Dokümantasyon**: Swagger/OpenAPI
-- **Paket Yöneticisi**: pnpm
+- **Documentation**: Swagger/OpenAPI
+- **Package Manager**: pnpm
 
-## 🚀 Kurulum
+## 🚀 Setup
 
-### 1. Projeyi Klonlayın
+### 1. Clone the Project
 
 ```bash
 git clone https://github.com/SemihKopcal/finance_api
 cd test_case
 ```
 
-### 2. Bağımlılıkları Yükleyin
+### 2. Install Dependencies
 
 ```bash
 pnpm install
@@ -40,7 +40,7 @@ pnpm install
 
 ### 3. Environment Variables
 
-`.env` dosyası oluşturun:
+Create a `.env` file:
 
 ```env
 # MongoDB Connection
@@ -56,19 +56,19 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 NODE_ENV=development
 ```
 
-### 4. MongoDB'yi Başlatın
+### 4. Start MongoDB
 
-MongoDB servisini başlatın veya Docker kullanın:
+Start the MongoDB service or use Docker:
 
 ```bash
-# Docker ile MongoDB
+# MongoDB with Docker
 docker run -d -p 27017:27017 --name mongodb mongo:latest
 ```
 
-### 5. Uygulamayı Başlatın
+### 5. Start the Application
 
 ```bash
-# Development modunda
+# Development mode
 pnpm run dev
 
 # Production build
@@ -76,99 +76,62 @@ pnpm run build
 pnpm start
 ```
 
-## 📁 Proje Yapısı
+## 📁 Project Structure
 
 ```
 src/
-├── auth/                 # Kullanıcı kimlik doğrulama
+├── auth/                 # User authentication
 │   ├── auth.controller.ts
 │   ├── auth.middleware.ts
 │   ├── auth.route.ts
 │   ├── auth.service.ts
 │   └── entities/
-├── categories/           # Kategori yönetimi
+├── categories/           # Category management
 │   ├── categories.controller.ts
 │   ├── categories.route.ts
 │   ├── categories.service.ts
 │   └── entities/
-├── transactions/         # İşlem yönetimi
+├── transactions/         # Transaction management
 │   ├── transactions.controller.ts
 │   ├── transactions.route.ts
 │   ├── transactions.service.ts
 │   └── entities/
-├── reports/             # Raporlama
+├── reports/             # Reporting
 │   ├── reports.controller.ts
 │   ├── reports.route.ts
 │   └── reports.service.ts
-├── middleware/          # Middleware'ler
+├── middleware/          # Middlewares
 │   └── validation.middleware.ts
-├── db.ts               # Veritabanı bağlantısı
-├── swagger.ts          # API dokümantasyonu
-└── index.ts            # Ana uygulama
+├── db.ts               # Database connection
+├── swagger.ts          # API documentation
+└── index.ts            # Main application
 ```
 
-## 🔌 API Endpoints
+## 🔒 Validation Rules
 
-### 🔐 Kimlik Doğrulama
+### User Registration
+- **Name**: 2-50 characters, only letters and spaces
+- **Email**: Valid email format
+- **Password**: At least 6 characters, 1 uppercase, 1 lowercase, 1 digit
 
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| `POST` | `/auth/register` | Kullanıcı kaydı |
-| `POST` | `/auth/login` | Kullanıcı girişi |
-| `GET` | `/auth/profile` | Profil bilgileri |
-| `PUT` | `/auth/profile` | Profil güncelleme |
+### Category
+- **Name**: 2-50 characters, only letters and spaces
+- **Type**: `income` or `expense`
+- **Color**: Hex format (#FF5733)
 
-### 📊 Kategoriler
-
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| `GET` | `/categories/defaults` | Varsayılan kategoriler |
-| `GET` | `/categories` | Varsayılanlar ile birlikte kullanıcı kategorileri|
-| `POST` | `/categories` | Yeni kategori oluşturma |
-| `GET` | `/categories/:id` | Kategori detayı |
-| `PUT` | `/categories/:id` | Kategori güncelleme |
-| `DELETE` | `/categories/:id` | Kategori silme |
-
-### 💰 İşlemler
-
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| `POST` | `/transactions` | Yeni işlem oluşturma |
-| `GET` | `/transactions` | İşlem listesi |
-| `GET` | `/transactions/:id` | İşlem detayı |
-| `PUT` | `/transactions/:id` | İşlem güncelleme |
-| `DELETE` | `/transactions/:id` | İşlem silme |
-
-### 📈 Raporlar
-
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| `GET` | `/reports/summary` | Genel özet raporu |
-| `GET` | `/reports/categories` | Kategori bazlı analiz |
-| `GET` | `/reports/balance` | Toplam bakiye raporu |
-
-## 🔒 Validation Kuralları
-
-### Kullanıcı Kaydı
-- **İsim**: 2-50 karakter, sadece harf ve boşluk
-- **Email**: Geçerli email formatı
-- **Şifre**: En az 6 karakter, 1 büyük harf, 1 küçük harf, 1 rakam
-
-### Kategori
-- **İsim**: 2-50 karakter, sadece harf ve boşluk
-- **Tip**: `income` veya `expense`
-- **Renk**: Hex format (#FF5733)
-
-### İşlem
-- **Tutar**: 0.01'den büyük
-- **Tip**: `income` veya `expense`
-- **Kategori ID**: Geçerli MongoDB ObjectId
-- **Açıklama**: Maksimum 500 karakter
-- **Tarih**: ISO 8601 formatı
+### Transaction
+- **Amount**: Greater than 0.01
+- **Type**: `income` or `expense`
+- **Category ID**: Valid MongoDB ObjectId
+- **Description**: Maximum 500 characters
+- **Date**: ISO 8601 format
 
 ## 🧪 Test
 
 ```bash
+pnpm test
+```
+
 # Linting
 pnpm run lint
 
@@ -179,9 +142,9 @@ pnpm run lint:fix
 pnpm run format
 ```
 
-## 📚 API Dokümantasyonu
+## 📚 API Documentation
 
-Uygulama çalıştıktan sonra Swagger dokümantasyonuna erişin:
+After starting the application, access Swagger documentation at:
 
 ```
 http://localhost:3001/api-docs
@@ -189,9 +152,9 @@ http://localhost:3001/api-docs
 
 ## 🌱 Seed Data
 
-Varsayılan kategoriler otomatik olarak uygulama başlatıldığında oluşturulur.
+Default categories are automatically created when the application starts.
 
-Manuel olarak transaction'lar oluşturmak için:
+To manually create transactions:
 
 ```bash
 pnpm run seed:transactions
@@ -207,7 +170,7 @@ pnpm run build
 
 ### 2. Environment Variables
 
-Production için güvenli environment variables ayarlayın:
+Set secure environment variables for production:
 
 ```env
 NODE_ENV=production
@@ -217,7 +180,7 @@ JWT_SECRET=your-very-secure-jwt-secret
 
 ### 3. Process Manager
 
-PM2 ile uygulamayı yönetin:
+Manage the application with PM2:
 
 ```bash
 npm install -g pm2
@@ -226,26 +189,26 @@ pm2 startup
 pm2 save
 ```
 
-## 🤝 Katkıda Bulunma
+## 🤝 Contributing
 
-1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit yapın (`git commit -m 'Add amazing feature'`)
-4. Push yapın (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to your branch (`git push origin feature/amazing-feature`)
+5. Create a Pull Request
 
-## 📝 Lisans
+## 📝 License
 
-Bu proje [ISC](LICENSE) lisansı altında lisanslanmıştır.
+This project is licensed under the [ISC](LICENSE) license.
 
-## 📞 İletişim
+## 📞 Contact
 
-- **Proje**: [GitHub Repository](https://github.com/SemihKopcal/finance_api)
+- **Project**: [GitHub Repository](https://github.com/SemihKopcal/finance_api)
 - **Issues**: [GitHub Issues](https://github.com/SemihKopcal/finance_api/issues)
 
-## 🙏 Teşekkürler
+## 🙏 Thanks
 
-Bu proje aşağıdaki açık kaynak projeleri kullanmaktadır:
+This project uses the following open source projects:
 
 - [Express.js](https://expressjs.com/)
 - [Mongoose](https://mongoosejs.com/)

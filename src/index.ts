@@ -2,41 +2,27 @@ import express from 'express';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 
-// Routes - Artık index.ts dosyalarından import ediyoruz
 import { authRoute } from './auth';
 import { categoryRoute } from './categories';
 import { transactionsRoute } from './transactions';
 import { reportsRoute } from './reports';
+import { userRoute } from './user';
 
-import { setupSwagger } from './swagger';
-import { seedTransactions } from './seed-transactions';
-import { seedCategories } from './seed-categories';
-import connectDB from './db';
+import { setupSwagger } from './swagger/swagger';
+import connectDB from './database/db';
 
 dotenv.config();
 
-// MongoDB bağlantısı ve default kategorileri oluştur
 const initializeApp = async () => {
   try {
     await connectDB();
-
-    // Default category ve transaction'ları oluştur
-    if (process.env.NODE_ENV !== 'production') {
-      try {
-        await seedCategories();
-        await seedTransactions();
-        console.log("✅ Default transaction'lar oluşturuldu");
-      } catch (error) {
-        console.log("⚠️  Default transaction'lar oluşturulamadı:", error);
-      }
-    }
 
     const app = express();
     app.use(express.json());
 
     const limiter = rateLimit({
-      windowMs: 1 * 60 * 1000, // 1 dakika
-      max: 60, // 60 istek
+      windowMs: 1 * 60 * 1000,
+      max: 60,
       message: 'Çok fazla istek yaptınız, lütfen daha sonra tekrar deneyin.',
     });
     app.use((req, res, next) => {
@@ -47,11 +33,11 @@ const initializeApp = async () => {
     });
 
     app.use('/auth', authRoute);
+    app.use('/user', userRoute);
     app.use('/categories', categoryRoute);
     app.use('/transactions', transactionsRoute);
     app.use('/reports', reportsRoute);
 
-    // Swagger dokümantasyonu
     setupSwagger(app);
 
     const PORT = process.env.PORT || 3001;
@@ -65,5 +51,4 @@ const initializeApp = async () => {
   }
 };
 
-// Uygulamayı başlat
 initializeApp();

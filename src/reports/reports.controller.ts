@@ -69,19 +69,16 @@ export class ReportsController {
 
       let month = req.query.month as string;
       
-      // Eğer month parametresi verilmemişse, mevcut ayı kullan
       if (!month) {
         const now = new Date();
         month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
       } else {
-        // Ay formatını esnek şekilde parse et
         const monthMatch = month.match(/(\d{4})[-\/.](\d{1,2})/);
         if (monthMatch && monthMatch[1] && monthMatch[2]) {
           const year = monthMatch[1];
           const monthNum = monthMatch[2].padStart(2, '0');
           month = `${year}-${monthNum}`;
         }
-        // Format uygun değilse olduğu gibi kullan (hata verme)
       }
 
       const summary = await ReportsService.getSummaryReport(userId, month);
@@ -223,19 +220,16 @@ export class ReportsController {
 
       let month = req.query.month as string;
       
-      // Eğer month parametresi verilmemişse, mevcut ayı kullan
       if (!month) {
         const now = new Date();
         month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
       } else {
-        // Ay formatını esnek şekilde parse et
         const monthMatch = month.match(/(\d{4})[-\/.](\d{1,2})/);
         if (monthMatch && monthMatch[1] && monthMatch[2]) {
           const year = monthMatch[1];
           const monthNum = monthMatch[2].padStart(2, '0');
           month = `${year}-${monthNum}`;
         }
-        // Format uygun değilse olduğu gibi kullan (hata verme)
       }
 
       const categoriesReport = await ReportsService.getCategoriesReport(userId, month);
