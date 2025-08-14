@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 
 // Routes - Artık index.ts dosyalarından import ediyoruz
 import { authRoute } from './auth';
@@ -8,7 +9,6 @@ import { transactionsRoute } from './transactions';
 import { reportsRoute } from './reports';
 
 import { setupSwagger } from './swagger';
-import { CategoryService } from './categories/categories.service';
 import { seedTransactions } from './seed-transactions';
 import { seedCategories } from './seed-categories';
 import connectDB from './db';
@@ -19,7 +19,6 @@ dotenv.config();
 const initializeApp = async () => {
   try {
     await connectDB();
-
 
     // Default category ve transaction'ları oluştur
     if (process.env.NODE_ENV !== 'production') {
@@ -34,6 +33,18 @@ const initializeApp = async () => {
 
     const app = express();
     app.use(express.json());
+
+    const limiter = rateLimit({
+      windowMs: 1 * 60 * 1000, // 1 dakika
+      max: 60, // 60 istek
+      message: 'Çok fazla istek yaptınız, lütfen daha sonra tekrar deneyin.',
+    });
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/api-docs')) {
+        return next();
+      }
+      return limiter(req, res, next);
+    });
 
     app.use('/auth', authRoute);
     app.use('/categories', categoryRoute);

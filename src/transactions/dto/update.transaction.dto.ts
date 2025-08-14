@@ -12,9 +12,6 @@
  *           type: string
  *           enum: [income, expense]
  *           example: "income"
- *         categoryId:
- *           type: string
- *           example: "64e5b2f2c2a4f2a1b8e5b2f2"
  *         description:
  *           type: string
  *           example: "Fatura ödemesi"
