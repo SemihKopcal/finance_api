@@ -116,7 +116,20 @@ export class AuthController {
       const { name, email, password } = req.body;
       const user = await AuthService.register(name, email, password);
       res.status(201).json({ message: "User registered", userId: user._id });
-    } catch (error) {
+    } catch (error: any) {
+      // Email already exists hatası için özel handling
+      if (error.code === 'EMAIL_ALREADY_EXISTS') {
+        return res.status(409).json({
+          success: false,
+          error: {
+            code: 'EMAIL_ALREADY_EXISTS',
+            message: error.message,
+            details: 'Bu email adresi ile daha önce kayıt yapılmış. Lütfen farklı bir email adresi kullanın veya giriş yapın.'
+          }
+        });
+      }
+      
+      // Diğer hatalar için next() ile error middleware'e gönder
       next(error);
     }
   }
@@ -144,7 +157,7 @@ export class AuthController {
    *                 example: "johndoe@example.com"
    *               password:
    *                 type: string
-   *                 example: "password123"
+   *                 example: "Password123"
    *     responses:
    *       200:
    *         description: Başarılı giriş
@@ -165,7 +178,14 @@ export class AuthController {
       const { email, password } = req.body;
       const user = await AuthService.validateUser(email, password);
       if (!user)
-        return res.status(400).json({ message: "Invalid credentials" });
+        return res.status(401).json({
+          success: false,
+          error: {
+            code: 'INVALID_CREDENTIALS',
+            message: 'Geçersiz email veya şifre',
+            details: 'Lütfen email adresinizi ve şifrenizi kontrol edin.'
+          }
+        });
 
       const token = jwt.sign(
         { userId: user._id },
@@ -175,7 +195,11 @@ export class AuthController {
         }
       );
 
-      res.json({ token });
+      res.json({ 
+        success: true,
+        message: 'Giriş başarılı',
+        token 
+      });
     } catch (error) {
       next(error);
     }

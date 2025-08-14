@@ -1,10 +1,15 @@
-import { User, IUser } from './entites/user.model';
+import { User, IUser } from './entities/user.model';
 import bcrypt from 'bcrypt';
 
 export class AuthService {
   static async register(name: string, email: string, password: string): Promise<IUser> {
     const existingUser = await User.findOne({ email });
-    if (existingUser) throw new Error('Email already in use');
+    if (existingUser) {
+      const error = new Error('Bu email adresi zaten kullanımda');
+      (error as any).statusCode = 409;
+      (error as any).code = 'EMAIL_ALREADY_EXISTS';
+      throw error;
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ name, email, password: hashedPassword });

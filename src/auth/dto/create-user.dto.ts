@@ -18,7 +18,7 @@
  *           example: "johndoe@example.com"
  *         password:
  *           type: string
- *           example: "password123"
+ *           example: "Password123"
  */
 export interface CreateUserDto {
   name: string;
