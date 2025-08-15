@@ -47,7 +47,7 @@ Create a `.env` file:
 MONGO_URI=mongodb://localhost:27017/test_case
 
 # Server Configuration
-PORT=3001
+PORT=3018
 
 # JWT Secret
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
@@ -147,16 +147,18 @@ pnpm run format
 After starting the application, access Swagger documentation at:
 
 ```
-http://localhost:3001/api-docs
+http://localhost:3018/api-docs
 ```
 
 ## 🌱 Seed Data
 
-Default categories are automatically created when the application starts.
+Default categories and transactions are **not** created automatically.
 
-To manually create transactions:
+To seed data manually, you must first create a user via the API.  
+After creating a user, run the following commands to seed categories and transactions for that user:
 
 ```bash
+pnpm run seed:categories
 pnpm run seed:transactions
 ```
 

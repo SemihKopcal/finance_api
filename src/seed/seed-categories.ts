@@ -5,9 +5,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+mongoose.connect(process.env.MONGO_URI || '', {})
+  .then(() => console.log('MongoDB bağlantısı başarılı!'))
+  .catch((err) => console.error('MongoDB bağlantı hatası:', err));
+
 const seedCategories = async () => {
   try {
-    // find the first user
     const user = await User.findOne();
     if (!user) {
       console.log('Kullanıcı bulunamadı. Önce bir kullanıcı oluşturun!');
@@ -22,7 +25,8 @@ const seedCategories = async () => {
     console.log('✅ Default kategoriler başarıyla oluşturuldu!');
   } catch (error) {
     console.error('Kategori seedleme hatası:', error);
+  } finally {
+    mongoose.disconnect();
   }
 };
-
-export { seedCategories };
+seedCategories();

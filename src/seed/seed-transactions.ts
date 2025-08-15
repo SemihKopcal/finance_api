@@ -6,6 +6,10 @@ import { User } from '../user/entities/user.model';
 
 dotenv.config();
 
+mongoose.connect(process.env.MONGO_URI || '', {})
+  .then(() => console.log('MongoDB bağlantısı başarılı!'))
+  .catch((err) => console.error('MongoDB bağlantı hatası:', err));
+  
 let DEMO_USER_ID: string = '';
 
 const getRandomAmount = (min: number, max: number): number => {
@@ -167,5 +171,4 @@ const seedTransactions = async () => {
   }
 };
 
-
-export { seedTransactions };
+seedTransactions();

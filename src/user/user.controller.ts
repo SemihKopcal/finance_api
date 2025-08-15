@@ -4,6 +4,41 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 /**
  * @openapi
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: "64e5b2f2c2a4f2a1b8e5b2f2"
+ *         name:
+ *           type: string
+ *           example: "John Doe"
+ *         email:
+ *           type: string
+ *           example: "john@example.com"
+ *         password:
+ *           type: string
+ *           example: "Password123"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-08-13T12:00:00.000Z"
+ *     UpdateUserDto:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: "Jane Doe"
+ *         email:
+ *           type: string
+ *           example: "jane@example.com"
+ */
+
+
+/**
+ * @openapi
  * /user/profile:
  *   get:
  *     tags:
