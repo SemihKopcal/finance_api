@@ -69,21 +69,40 @@ describe('CategoryService', () => {
 
   describe('getAllCategory', () => {
     it('should return combined user and default categories with pagination', async () => {
-      (Category.find as jest.Mock)
-      
-        .mockReturnValueOnce({
-          skip: () => ({
-            limit: () => ({
-              populate: jest.fn().mockResolvedValue(['userCat']),
-            }),
-          }),
-        })
-        
-        .mockResolvedValueOnce(['defaultCat']);
+      // populate mock
+      const populateMock = jest
+        .fn()
+        .mockResolvedValue([
+          {
+            _id: 'u1',
+            name: 'User Cat',
+            userId: { name: 'User', email: 'user@test.com' },
+          },
+        ]);
+
+      // mock user categories find().populate()
+      (Category.find as jest.Mock).mockImplementationOnce(() => ({
+        populate: () => populateMock(),
+      }));
+
+      // mock default categories find()
+      (Category.find as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve([{ _id: 'd1', name: 'Default Cat', isDefault: true }])
+      );
 
       const result = await CategoryService.getAllCategory('user1', 1, 10);
 
-      expect(result).toEqual(expect.arrayContaining(['userCat', 'defaultCat']));
+      // Beklenen sonuç: default + user kategorileri
+      expect(result).toEqual(
+        expect.arrayContaining([
+          { _id: 'd1', name: 'Default Cat', isDefault: true },
+          {
+            _id: 'u1',
+            name: 'User Cat',
+            userId: { name: 'User', email: 'user@test.com' },
+          },
+        ])
+      );
     });
   });
 
