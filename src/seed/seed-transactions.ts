@@ -2,15 +2,13 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { Category } from '../categories/entities/categories.model';
 import { Transaction } from '../transactions/entities/transaction.model';
-import { User } from '../user/entities/user.model';
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URI || '', {})
+mongoose
+  .connect(process.env.MONGO_URI || '', {})
   .then(() => console.log('MongoDB bağlantısı başarılı!'))
   .catch((err) => console.error('MongoDB bağlantı hatası:', err));
-  
-let DEMO_USER_ID: string = '';
 
 const getRandomAmount = (min: number, max: number): number => {
   return Math.round((Math.random() * (max - min) + min) * 100) / 100;
@@ -41,133 +39,66 @@ const getRandomDescription = (categoryName: string, type: string): string => {
       'Akşam yemeği',
     ],
     Ulaşım: ['Metro bileti', 'Otobüs bileti', 'Taksi', 'Benzin', 'Park ücreti'],
-    Alışveriş: [
-      'Giyim alışverişi',
-      'Elektronik ürün',
-      'Kitap',
-      'Spor malzemesi',
-    ],
-    Fatura: [
-      'Elektrik faturası',
-      'Su faturası',
-      'İnternet faturası',
-      'Telefon faturası',
-    ],
+    Alışveriş: ['Giyim alışverişi', 'Elektronik ürün', 'Kitap', 'Spor malzemesi'],
+    Fatura: ['Elektrik faturası', 'Su faturası', 'İnternet faturası', 'Telefon faturası'],
     Genel: ['Genel harcama', 'Diğer gider'],
   };
 
   const isIncome = type === 'income';
   const descriptionsMap = isIncome ? incomeDescriptions : expenseDescriptions;
-
   const safeCategoryName = categoryName || 'Genel';
-  const categoryDescriptions: string[] = descriptionsMap[
-    safeCategoryName as keyof typeof descriptionsMap
-  ] ||
-    descriptionsMap['Genel'] || ['Açıklama yok'];
+  const categoryDescriptions: string[] = descriptionsMap[safeCategoryName as keyof typeof descriptionsMap] 
+    || descriptionsMap['Genel'] || ['Açıklama yok'];
 
   const randomIndex = Math.floor(Math.random() * categoryDescriptions.length);
-  return categoryDescriptions[randomIndex] ?? "Aciklama Yok";
+  return categoryDescriptions[randomIndex] ?? 'Açıklama yok';
 };
 
 const seedTransactions = async () => {
   try {
-    let user = await User.findOne();
-    if (!user) {
-      console.log('Kullanıcı bulunamadı. Önce bir kullanıcı oluşturun!');
-      return;
-    }
-
-    DEMO_USER_ID = (user._id as any).toString();
-    console.log(`Kullanıcı bulundu: ${user.email} (ID: ${DEMO_USER_ID})`);
-
-    const existingTransactions = await Transaction.find({ userId: DEMO_USER_ID });
-    if (existingTransactions.length > 0) {
-      console.log(`🚫 ${existingTransactions.length} transaction zaten mevcut. Seed işlemi atlandı.`);
-      return;
-    }
-
-    const defaultCategories = await Category.find({
-      isDefault: true,
-      userId: DEMO_USER_ID,
-    });
-    console.log(`Bulunan default kategoriler: ${defaultCategories.length}`);
-
+    const defaultCategories = await Category.find({ isDefault: true });
     if (defaultCategories.length === 0) {
-      console.log('Önce default kategorileri oluşturun!');
+      console.log('🚫 Default kategoriler bulunamadı. Önce seedCategories çalıştırın!');
       return;
     }
 
     const createdTransactions = [];
 
     for (const category of defaultCategories) {
-      const transactionCount = Math.floor(Math.random() * 2) + 2; // 2-3 
-
-      console.log(
-        `${category.name} kategorisi için ${transactionCount} transaction oluşturuluyor...`
-      );
+      const transactionCount = Math.floor(Math.random() * 2) + 2; // 2-3
+      console.log(`${category.name} kategorisi için ${transactionCount} transaction oluşturuluyor...`);
 
       for (let i = 0; i < transactionCount; i++) {
-        let minAmount, maxAmount;
-        if (category.type === 'income') {
-          minAmount = 1000;
-          maxAmount = 10000;
-        } else {
-          minAmount = 50;
-          maxAmount = 500;
-        }
+        const [minAmount, maxAmount] = category.type === 'income' ? [1000, 10000] : [50, 500];
 
         const transaction = new Transaction({
           amount: getRandomAmount(minAmount, maxAmount),
           type: category.type,
           categoryId: category._id,
-          userId: DEMO_USER_ID,
-          description: getRandomDescription(
-            category.name || 'Genel',
-            category.type || 'expense'
-          ),
+          description: getRandomDescription(category.name || 'Genel', category.type),
           date: getRandomDate(),
+          isDefault: true, // default transaction
+          // userId artık opsiyonel, seedlerde gerek yok
         });
 
         await transaction.save();
         createdTransactions.push(transaction);
-
-        console.log(
-          `  - ${transaction.description}: ${transaction.amount} TL (${transaction.date.toLocaleDateString('tr-TR')})`
-        );
       }
     }
 
-    console.log(
-      `\n✅ Toplam ${createdTransactions.length} transaction başarıyla oluşturuldu!`
-    );
+    console.log(`\n✅ Toplam ${createdTransactions.length} transaction başarıyla oluşturuldu!`);
 
-    // summary infos
-    const incomeTransactions = createdTransactions.filter(
-      (t) => t.type === 'income'
-    );
-    const expenseTransactions = createdTransactions.filter(
-      (t) => t.type === 'expense'
-    );
+    const incomeTotal = createdTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const expenseTotal = createdTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
-    const totalIncome = incomeTransactions.reduce(
-      (sum, t) => sum + t.amount,
-      0
-    );
-    const totalExpense = expenseTransactions.reduce(
-      (sum, t) => sum + t.amount,
-      0
-    );
-
-    console.log(`\n📊 Özet:`);
-    console.log(
-      `  Gelir işlemleri: ${incomeTransactions.length} adet, Toplam: ${totalIncome.toFixed(2)} TL`
-    );
-    console.log(
-      `  Gider işlemleri: ${expenseTransactions.length} adet, Toplam: ${totalExpense.toFixed(2)} TL`
-    );
-    console.log(`  Net bakiye: ${(totalIncome - totalExpense).toFixed(2)} TL`);
-  } catch (error) {
-    console.error('Hata:', error);
+    console.log(`📊 Özet:`);
+    console.log(`  Gelir Toplamı: ${incomeTotal.toFixed(2)} TL`);
+    console.log(`  Gider Toplamı: ${expenseTotal.toFixed(2)} TL`);
+    console.log(`  Net Bakiye: ${(incomeTotal - expenseTotal).toFixed(2)} TL`);
+  } catch (err) {
+    console.error('❌ Seed hata:', err);
+  } finally {
+    mongoose.disconnect();
   }
 };
 

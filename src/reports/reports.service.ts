@@ -62,9 +62,8 @@ export interface BalanceReport {
 }
 
 export class ReportsService {
-  
   static async getSummaryReport(
-    userId: string,
+    userId: string, // zorunlu
     month: string
   ): Promise<SummaryReport> {
     const startDate = new Date(month + '-01');
@@ -74,11 +73,19 @@ export class ReportsService {
       0
     );
 
+    // Hem kullanıcıya ait hem de default transactionlar
+    const userFilter = {
+      $or: [
+        { userId: new mongoose.Types.ObjectId(userId) },
+        { userId: { $exists: false } }, // default
+      ],
+    };
+
     const [incomeResult, expenseResult, totalCount] = await Promise.all([
       Transaction.aggregate([
         {
           $match: {
-            userId: new mongoose.Types.ObjectId(userId),
+            ...userFilter,
             type: 'income',
             date: { $gte: startDate, $lte: endDate },
           },
@@ -93,7 +100,7 @@ export class ReportsService {
       Transaction.aggregate([
         {
           $match: {
-            userId: new mongoose.Types.ObjectId(userId),
+            ...userFilter,
             type: 'expense',
             date: { $gte: startDate, $lte: endDate },
           },
@@ -106,7 +113,7 @@ export class ReportsService {
         },
       ]),
       Transaction.countDocuments({
-        userId: new mongoose.Types.ObjectId(userId),
+        ...userFilter,
         date: { $gte: startDate, $lte: endDate },
       }),
     ]);
@@ -123,11 +130,18 @@ export class ReportsService {
       month,
     };
   }
-
+  
   static async getCategoriesReport(
     userId: string,
     month?: string
   ): Promise<CategoryReport> {
+    const userFilter = {
+      $or: [
+        { userId: new mongoose.Types.ObjectId(userId) },
+        { userId: { $exists: false } }, // default transactions
+      ],
+    };
+
     let dateFilter = {};
     let periodInfo = {};
 
@@ -149,7 +163,7 @@ export class ReportsService {
     const incomeCategories = await Transaction.aggregate([
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(userId),
+          ...userFilter,
           type: 'income',
           ...dateFilter,
         },
@@ -162,9 +176,7 @@ export class ReportsService {
           as: 'category',
         },
       },
-      {
-        $unwind: '$category',
-      },
+      { $unwind: '$category' },
       {
         $group: {
           _id: {
@@ -184,15 +196,13 @@ export class ReportsService {
           transactionCount: 1,
         },
       },
-      {
-        $sort: { totalAmount: -1 },
-      },
+      { $sort: { totalAmount: -1 } },
     ]);
 
     const expenseCategories = await Transaction.aggregate([
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(userId),
+          ...userFilter,
           type: 'expense',
           ...dateFilter,
         },
@@ -205,9 +215,7 @@ export class ReportsService {
           as: 'category',
         },
       },
-      {
-        $unwind: '$category',
-      },
+      { $unwind: '$category' },
       {
         $group: {
           _id: {
@@ -227,9 +235,7 @@ export class ReportsService {
           transactionCount: 1,
         },
       },
-      {
-        $sort: { totalAmount: -1 },
-      },
+      { $sort: { totalAmount: -1 } },
     ]);
 
     const totalIncome = incomeCategories.reduce(
@@ -286,8 +292,7 @@ export class ReportsService {
 
   static async getBalanceReport(userId: string): Promise<BalanceReport> {
     const now = new Date();
-    const currentMonth =
-      now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const currentYear = now.getFullYear();
 
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -304,6 +309,13 @@ export class ReportsService {
     const yearStart = new Date(currentYear, 0, 1);
     const yearEnd = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
+    const userFilter = {
+      $or: [
+        { userId: new mongoose.Types.ObjectId(userId) },
+        { userId: { $exists: false } },
+      ],
+    };
+
     const [
       monthlyIncome,
       monthlyExpense,
@@ -315,90 +327,50 @@ export class ReportsService {
       Transaction.aggregate([
         {
           $match: {
-            userId: new mongoose.Types.ObjectId(userId),
+            ...userFilter,
             type: 'income',
             date: { $gte: monthStart, $lte: monthEnd },
           },
         },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$amount' },
-          },
-        },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Transaction.aggregate([
         {
           $match: {
-            userId: new mongoose.Types.ObjectId(userId),
+            ...userFilter,
             type: 'expense',
             date: { $gte: monthStart, $lte: monthEnd },
           },
         },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$amount' },
-          },
-        },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Transaction.aggregate([
         {
           $match: {
-            userId: new mongoose.Types.ObjectId(userId),
+            ...userFilter,
             type: 'income',
             date: { $gte: yearStart, $lte: yearEnd },
           },
         },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$amount' },
-          },
-        },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Transaction.aggregate([
         {
           $match: {
-            userId: new mongoose.Types.ObjectId(userId),
+            ...userFilter,
             type: 'expense',
             date: { $gte: yearStart, $lte: yearEnd },
           },
         },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$amount' },
-          },
-        },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Transaction.aggregate([
-        {
-          $match: {
-            userId: new mongoose.Types.ObjectId(userId),
-            type: 'income',
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$amount' },
-          },
-        },
+        { $match: { ...userFilter, type: 'income' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Transaction.aggregate([
-        {
-          $match: {
-            userId: new mongoose.Types.ObjectId(userId),
-            type: 'expense',
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$amount' },
-          },
-        },
+        { $match: { ...userFilter, type: 'expense' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
     ]);
 
@@ -409,21 +381,17 @@ export class ReportsService {
     const allTimeIncomeAmount = allTimeIncome[0]?.total || 0;
     const allTimeExpenseAmount = allTimeExpense[0]?.total || 0;
 
-    const monthlyNet = monthlyIncomeAmount - monthlyExpenseAmount;
-    const yearlyNet = yearlyIncomeAmount - yearlyExpenseAmount;
-    const allTimeNet = allTimeIncomeAmount - allTimeExpenseAmount;
-
     return {
-      currentBalance: allTimeNet,
+      currentBalance: allTimeIncomeAmount - allTimeExpenseAmount,
       monthlyIncome: monthlyIncomeAmount,
       monthlyExpense: monthlyExpenseAmount,
-      monthlyNet,
+      monthlyNet: monthlyIncomeAmount - monthlyExpenseAmount,
       yearlyIncome: yearlyIncomeAmount,
       yearlyExpense: yearlyExpenseAmount,
-      yearlyNet,
+      yearlyNet: yearlyIncomeAmount - yearlyExpenseAmount,
       allTimeIncome: allTimeIncomeAmount,
       allTimeExpense: allTimeExpenseAmount,
-      allTimeNet,
+      allTimeNet: allTimeIncomeAmount - allTimeExpenseAmount,
       reportDate: now.toISOString(),
       period: {
         currentMonth,

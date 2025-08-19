@@ -5,7 +5,8 @@ export interface ITransaction extends Document {
   description: string;
   type: 'income' | 'expense';
   categoryId: object;
-  userId: object;
+  isDefault: boolean;
+  userId?: object;
   date: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -16,7 +17,8 @@ const transactionSchema = new Schema<ITransaction>({
   description: { type: String, required: true },
   type: { type: String, enum: ['income', 'expense'], required: true },
   categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  isDefault: { type: Boolean, default: false, required: false },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
   date: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

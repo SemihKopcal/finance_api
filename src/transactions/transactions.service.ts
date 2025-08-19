@@ -5,26 +5,34 @@ import { Category } from '../categories/entities/categories.model';
 import mongoose from 'mongoose';
 
 export class TransactionService {
-  static async createTransaction(data: CreateTransactionDto, userId: string): Promise<ITransaction> {
+  static async createTransaction(
+    data: CreateTransactionDto,
+    userId: string
+  ): Promise<ITransaction> {
     const category = await Category.findById(data.categoryId);
     if (!category) {
       throw new Error('Kategori bulunamadı');
     }
 
     if (data.type !== category.type) {
-      throw new Error(`Bu kategori sadece ${category.type === 'income' ? 'gelir' : 'gider'} işlemleri için kullanılabilir. Seçilen kategori: ${category.name} (${category.type === 'income' ? 'Gelir' : 'Gider'})`);
+      throw new Error(
+        `Bu kategori sadece ${category.type === 'income' ? 'gelir' : 'gider'} işlemleri için kullanılabilir. Seçilen kategori: ${category.name} (${category.type === 'income' ? 'Gelir' : 'Gider'})`
+      );
     }
 
     const transaction = new Transaction({
       ...data,
       userId,
-      date: data.date ? new Date(data.date) : new Date()
+      date: data.date ? new Date(data.date) : new Date(),
     });
     await transaction.save();
     return transaction;
   }
 
-  static async getTransactionById(id: string, userId: string): Promise<ITransaction | null> {
+  static async getTransactionById(
+    id: string,
+    userId: string
+  ): Promise<ITransaction | null> {
     return Transaction.findOne({ _id: id, userId });
   }
 
@@ -42,7 +50,7 @@ export class TransactionService {
       sortOrder?: 'asc' | 'desc';
       limit?: number;
       page?: number;
-    }
+    } = {}
   ): Promise<{
     transactions: ITransaction[];
     total: number;
@@ -64,31 +72,27 @@ export class TransactionService {
       sortBy = 'date',
       sortOrder = 'desc',
       limit = 10,
-      page = 1
+      page = 1,
     } = filters;
-    
-    const query: any = { userId };
+
+    const query: any = {
+      $or: [{ userId }, { isDefault: true }],
+    };
 
     // Type filter
     if (type) query.type = type;
-    
+
     // Category filter
     if (category) query.categoryId = category;
-    
+
     // Date range filter
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        query.date.$gte = start;
-      }
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        query.date.$lte = end;
-      }
-    }
+    const now = new Date();
+    let start = startDate ? new Date(startDate) : new Date(0);
+    let end = endDate ? new Date(endDate) : now;
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    query.date = { $gte: start, $lte: end };
 
     // Amount range filter
     if (minAmount !== undefined || maxAmount !== undefined) {
@@ -111,11 +115,13 @@ export class TransactionService {
     const sortOptions: any = {};
     const validSortFields = ['date', 'amount', 'type', 'description'];
     const validSortOrders = ['asc', 'desc'];
-    
+
     if (validSortFields.includes(sortBy)) {
-      sortOptions[sortBy] = validSortOrders.includes(sortOrder) ? sortOrder : 'desc';
+      sortOptions[sortBy] = validSortOrders.includes(sortOrder)
+        ? sortOrder
+        : 'desc';
     } else {
-      sortOptions.date = 'desc'; 
+      sortOptions.date = 'desc';
     }
 
     const [transactions, total] = await Promise.all([
@@ -142,14 +148,14 @@ export class TransactionService {
       filters: {
         type,
         category,
-        startDate,
-        endDate,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
         minAmount,
         maxAmount,
         description,
         sortBy,
-        sortOrder
-      }
+        sortOrder,
+      },
     };
   }
 
@@ -171,17 +177,23 @@ export class TransactionService {
       }
 
       if (newType !== category.type) {
-        throw new Error(`Bu kategori sadece ${category.type === 'income' ? 'gelir' : 'gider'} işlemleri için kullanılabilir. Seçilen kategori: ${category.name} (${category.type === 'income' ? 'Gelir' : 'Gider'})`);
+        throw new Error(
+          `Bu kategori sadece ${category.type === 'income' ? 'gelir' : 'gider'} işlemleri için kullanılabilir. Seçilen kategori: ${category.name} (${category.type === 'income' ? 'Gelir' : 'Gider'})`
+        );
       }
     }
 
     if (updateData.amount !== undefined) transaction.amount = updateData.amount;
     if (updateData.type !== undefined) transaction.type = updateData.type;
     if (updateData.categoryId !== undefined) {
-      transaction.categoryId = new mongoose.Types.ObjectId(updateData.categoryId);
+      transaction.categoryId = new mongoose.Types.ObjectId(
+        updateData.categoryId
+      );
     }
-    if (updateData.description !== undefined) transaction.description = updateData.description;
-    if (updateData.date !== undefined) transaction.date = new Date(updateData.date);
+    if (updateData.description !== undefined)
+      transaction.description = updateData.description;
+    if (updateData.date !== undefined)
+      transaction.date = new Date(updateData.date);
 
     await transaction.save();
     return transaction;

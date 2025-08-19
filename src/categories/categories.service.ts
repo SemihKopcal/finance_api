@@ -67,17 +67,14 @@ export class CategoryService {
   ): Promise<ICategory[]> {
     const skip = (page - 1) * limit;
 
-    const userCategories = await Category.find({ userId, isDefault: false })
-      .skip(skip)
-      .limit(limit)
-      .populate('userId', 'name email');
-
-    const defaultCategories = await Category.find({
-      isDefault: true,
+    const userCategories = await Category.find({
       userId,
-    });
+      isDefault: false,
+    }).populate('userId', 'name email');
 
-    const allCategories = [...userCategories, ...defaultCategories];
+    const defaultCategories = await Category.find({ isDefault: true });
+
+    const allCategories = [...defaultCategories, ...userCategories];
 
     return allCategories.slice(skip, skip + limit);
   }
